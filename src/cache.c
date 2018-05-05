@@ -484,7 +484,7 @@ static void* start_poof_callback(CattaCache *c, CattaKey *pattern, CattaCacheEnt
     return NULL;
 }
 
-void catta_cache_start_poof(CattaCache *c, CattaKey *key, const CattaAddress *a) {
+void catta_cache_start_poof(CattaCache *c, CattaKey *key, CattaAddress *a) {
     assert(c);
     assert(key);
 

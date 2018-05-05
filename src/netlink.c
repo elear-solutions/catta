@@ -79,13 +79,16 @@ int catta_netlink_work(CattaNetlink *nl, int block) {
         catta_log_warn("No sender credentials received, ignoring data.");
         return -1;
     }
-
-    cred = (struct ucred*) CMSG_DATA(cmsg);
+    struct ucred cred_copy;
+    memcpy(&cred_copy, CMSG_DATA(cmsg), (sizeof(struct ucred)));
+    cred = &cred_copy;
 
     if (cred->uid != 0)
         return -1;
 
-    p = (struct nlmsghdr *) nl->buffer;
+    struct nlmsghdr p_copy;
+    memcpy(&p_copy, nl->buffer, sizeof(struct nlmsghdr));
+    p = &p_copy;
 
     assert(nl->callback);
 

@@ -91,7 +91,7 @@ int catta_cache_entry_half_ttl(CattaCache *c, CattaCacheEntry *e);
 
 /** Start the "Passive observation of Failure" algorithm for all
  * records of the specified key. The specified address is  */
-void catta_cache_start_poof(CattaCache *c, CattaKey *key, const CattaAddress *a);
+void catta_cache_start_poof(CattaCache *c, CattaKey *key, CattaAddress *a);
 
 /* Stop a previously started POOF algorithm for a record. (Used for response suppresions records */
 void catta_cache_stop_poof(CattaCache *c, CattaRecord *record, const CattaAddress *a);

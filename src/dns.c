@@ -133,15 +133,17 @@ void catta_dns_packet_free(CattaDnsPacket *p) {
 void catta_dns_packet_set_field(CattaDnsPacket *p, unsigned idx, uint16_t v) {
     assert(p);
     assert(idx < CATTA_DNS_PACKET_HEADER_SIZE);
-
-    ((uint16_t*) CATTA_DNS_PACKET_DATA(p))[idx] = htons(v);
+    uint8_t *tmp = CATTA_DNS_PACKET_DATA(p);
+    uint16_t tmpHtons =  htons(v);
+    tmp = &((CATTA_DNS_PACKET_DATA(p))[idx*2]);
+    memcpy(tmp, &tmpHtons, sizeof(uint16_t));
 }
 
 uint16_t catta_dns_packet_get_field(CattaDnsPacket *p, unsigned idx) {
     assert(p);
     assert(idx < CATTA_DNS_PACKET_HEADER_SIZE);
 
-    return ntohs(((uint16_t*) CATTA_DNS_PACKET_DATA(p))[idx]);
+    return ntohs(((uint16_t*) (void *) CATTA_DNS_PACKET_DATA(p))[idx]);
 }
 
 void catta_dns_packet_inc_field(CattaDnsPacket *p, unsigned idx) {
@@ -833,14 +835,14 @@ size_t catta_dns_packet_space(CattaDnsPacket *p) {
     return p->max_size - p->size;
 }
 
-int catta_rdata_parse(CattaRecord *record, const void* rdata, size_t size) {
+int catta_rdata_parse(CattaRecord *record, void* rdata, size_t size) {
     int ret;
     CattaDnsPacket p;
 
     assert(record);
     assert(rdata);
 
-    p.data = (void*) rdata;
+    p.data = (void *) rdata;
     p.max_size = p.size = size;
     p.rindex = 0;
     p.name_table = NULL;

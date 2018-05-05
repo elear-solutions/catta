@@ -568,7 +568,7 @@ static void reflect_probe(CattaServer *s, CattaInterface *i, CattaRecord *r) {
             catta_interface_post_probe(j, r, 1);
 }
 
-static void handle_query_packet(CattaServer *s, CattaDnsPacket *p, CattaInterface *i, const CattaAddress *a, uint16_t port, int legacy_unicast, int from_local_iface) {
+static void handle_query_packet(CattaServer *s, CattaDnsPacket *p, CattaInterface *i, CattaAddress *a, uint16_t port, int legacy_unicast, int from_local_iface) {
     size_t n;
     int is_probe;
 
@@ -888,7 +888,7 @@ static int originates_from_local_iface(CattaServer *s, CattaIfIndex iface, const
     return catta_interface_has_address(s->monitor, iface, a);
 }
 
-static void dispatch_packet(CattaServer *s, CattaDnsPacket *p, const CattaAddress *src_address, uint16_t port, const CattaAddress *dst_address, CattaIfIndex iface, int ttl) {
+static void dispatch_packet(CattaServer *s, CattaDnsPacket *p, CattaAddress *src_address, uint16_t port, const CattaAddress *dst_address, CattaIfIndex iface, int ttl) {
     CattaInterface *i;
     int from_local_iface = 0;
 

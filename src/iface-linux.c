@@ -43,24 +43,21 @@
 #endif
 
 static int netlink_list_items(CattaNetlink *nl, uint16_t type, unsigned *ret_seq) {
-    struct nlmsghdr *n;
+    struct nlmsghdr n = {0, 0, 0, 0, 0};
     struct rtgenmsg *gen;
-    uint8_t req[1024];
 
     /* Issue a wild dump NETLINK request */
 
-    memset(&req, 0, sizeof(req));
-    n = (struct nlmsghdr*) req;
-    n->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtgenmsg));
-    n->nlmsg_type = type;
-    n->nlmsg_flags = NLM_F_REQUEST|NLM_F_DUMP;
-    n->nlmsg_pid = 0;
+    n.nlmsg_len = NLMSG_LENGTH(sizeof(struct rtgenmsg));
+    n.nlmsg_type = type;
+    n.nlmsg_flags = NLM_F_REQUEST|NLM_F_DUMP;
+    n.nlmsg_pid = 0;
 
-    gen = NLMSG_DATA(n);
+    gen = NLMSG_DATA(&n);
     memset(gen, 0, sizeof(struct rtgenmsg));
     gen->rtgen_family = AF_UNSPEC;
 
-    return catta_netlink_send(nl, n, ret_seq);
+    return catta_netlink_send(nl, &n, ret_seq);
 }
 
 static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdata) {
@@ -110,7 +107,13 @@ static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdat
 
         /* Handle interface attributes */
         l = NLMSG_PAYLOAD(n, sizeof(struct ifinfomsg));
-        a = IFLA_RTA(ifinfomsg);
+        char ifinfomsg_char[sizeof(struct ifinfomsg)];
+        memcpy(&ifinfomsg_char, ifinfomsg, sizeof(struct ifinfomsg));
+        char * ifinfomsg_char_ptr = (char *)ifinfomsg_char + NLMSG_ALIGN(sizeof(struct ifaddrmsg));
+        struct rtattr a_copy;
+        memcpy(&a_copy, ifinfomsg_char_ptr, sizeof(struct rtattr));
+        a = &a_copy;
+
 
         while (RTA_OK(a, l)) {
             switch(a->rta_type) {
@@ -383,7 +386,7 @@ void catta_interface_monitor_sync(CattaInterfaceMonitor *m) {
      * dumping */
 
     while (!m->list_complete)
-        if (!catta_netlink_work(m->osdep.netlink, 1) == 0)
+        if (catta_netlink_work(m->osdep.netlink, 1) != 0)
             break;
 
     /* At this point Catta knows about all local interfaces and
