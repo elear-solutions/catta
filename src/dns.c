@@ -142,8 +142,11 @@ void catta_dns_packet_set_field(CattaDnsPacket *p, unsigned idx, uint16_t v) {
 uint16_t catta_dns_packet_get_field(CattaDnsPacket *p, unsigned idx) {
     assert(p);
     assert(idx < CATTA_DNS_PACKET_HEADER_SIZE);
-
-    return ntohs(((uint16_t*) (void *) CATTA_DNS_PACKET_DATA(p))[idx]);
+    uint8_t *tmp = CATTA_DNS_PACKET_DATA(p);
+    uint16_t tmpUint16;
+    tmp = &((CATTA_DNS_PACKET_DATA(p))[idx*2]);
+    memcpy(&tmpUint16, tmp, sizeof(uint16_t));
+    return ntohs(&tmpUint16);
 }
 
 void catta_dns_packet_inc_field(CattaDnsPacket *p, unsigned idx) {
