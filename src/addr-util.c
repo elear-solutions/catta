@@ -37,15 +37,17 @@ CattaAddress *catta_address_from_sockaddr(const struct sockaddr* sa, CattaAddres
     assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
 
     ret_addr->proto = catta_af_to_proto(sa->sa_family);
+    /* <ES_mod> */
     if(sa->sa_family == AF_INET) {
       struct sockaddr_in sa_in;
       memcpy(&sa_in, sa, sizeof(struct sockaddr));
-      memcpy(&ret_addr->data.ipv4, &(&sa_in)->sin_addr, sizeof(ret_addr->data.ipv4));
+      memcpy(&ret_addr->data.ipv4, &(sa_in.sin_addr), sizeof(ret_addr->data.ipv4));
     } else {
       struct sockaddr_in6 sa_in6;
       memcpy(&sa_in6, sa, sizeof(struct sockaddr));
-      memcpy(&ret_addr->data.ipv6, &(&sa_in6)->sin6_addr, sizeof(ret_addr->data.ipv6));
+      memcpy(&ret_addr->data.ipv6, &(sa_in6.sin6_addr), sizeof(ret_addr->data.ipv6));
     }
+    /* </ES_mod> */
     return ret_addr;
 }
 
@@ -53,15 +55,17 @@ uint16_t catta_port_from_sockaddr(const struct sockaddr* sa) {
     assert(sa);
 
     assert(sa->sa_family == AF_INET || sa->sa_family == AF_INET6);
+    /* <ES_mod> */
     if(sa->sa_family == AF_INET) {
       struct sockaddr_in sa_in;
       memcpy(&sa_in, sa, sizeof(struct sockaddr));
-      return ntohs((&sa_in)->sin_port);
+      return ntohs(sa_in.sin_port);
     } else {
       struct sockaddr_in6 sa_in6;
       memcpy(&sa_in6, sa, sizeof(struct sockaddr));
-      return ntohs((&sa_in6)->sin6_port);
+      return ntohs(sa_in6.sin6_port);
     }
+    /* </ES_mod> */
 }
 
 int catta_address_is_ipv4_in_ipv6(const CattaAddress *a) {

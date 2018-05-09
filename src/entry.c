@@ -714,14 +714,17 @@ int catta_server_add_service(
     const char *name,
     const char *type,
     const char *domain,
-    const char *host,
+    /* <ES_mod> */
     uint16_t port,
+    const char *host,
+    /* </ES_mod> */
     ... ){
 
     va_list va;
     int ret;
-
-    va_start(va, port);
+    /* <ES_mod> */
+    va_start(va, host);
+    /* </ES_mod> */
     ret = server_add_service_strlst_nocopy(s, g, iface, protocol, flags, name, type, domain, host, port, catta_string_list_new_va(va));
     va_end(va);
 

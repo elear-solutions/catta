@@ -138,9 +138,10 @@ void catta_hw_interface_update_rrs(CattaHwInterface *hw, int remove_rrs) {
             catta_unescape_label(&p, unescaped, sizeof(unescaped));
             catta_format_mac_address(mac, sizeof(mac), hw->mac_address, hw->mac_address_size);
             snprintf(name, sizeof(name), "%s [%s]", unescaped, mac);
-
-            if (catta_server_add_service(m->server, hw->entry_group, hw->index, CATTA_PROTO_UNSPEC, 0, name, "_workstation._tcp", NULL, NULL, 9, NULL) < 0) {
-                catta_log_warn(__FILE__": catta_server_add_service() failed: %s", catta_strerror(m->server->error));
+	    /* <ES_mod> */
+            if (catta_server_add_service(m->server, hw->entry_group, hw->index, CATTA_PROTO_UNSPEC, 0, name, "_workstation._tcp", NULL, 9, NULL, NULL) < 0) {
+ 	    /* </ES_mod> */               
+ 		catta_log_warn(__FILE__": catta_server_add_service() failed: %s", catta_strerror(m->server->error));
                 catta_s_entry_group_free(hw->entry_group);
                 hw->entry_group = NULL;
             } else

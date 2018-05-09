@@ -43,21 +43,26 @@
 #endif
 
 static int netlink_list_items(CattaNetlink *nl, uint16_t type, unsigned *ret_seq) {
-    struct nlmsghdr n = {0, 0, 0, 0, 0};
+    struct nlmsghdr *n;
     struct rtgenmsg *gen;
-
+    /* <ES_mod> */
     /* Issue a wild dump NETLINK request */
 
-    n.nlmsg_len = NLMSG_LENGTH(sizeof(struct rtgenmsg));
-    n.nlmsg_type = type;
-    n.nlmsg_flags = NLM_F_REQUEST|NLM_F_DUMP;
-    n.nlmsg_pid = 0;
+    n = (struct nlmsghdr*) catta_malloc(sizeof(uint8_t)*1024);
+    memset(n, 0, sizeof(uint8_t)*1024);
+    n->nlmsg_len = NLMSG_LENGTH(sizeof(struct rtgenmsg));
+    n->nlmsg_type = type;
+    n->nlmsg_flags = NLM_F_REQUEST|NLM_F_DUMP;
+    n->nlmsg_pid = 0;
 
-    gen = NLMSG_DATA(&n);
+    gen = NLMSG_DATA(n);
     memset(gen, 0, sizeof(struct rtgenmsg));
     gen->rtgen_family = AF_UNSPEC;
 
-    return catta_netlink_send(nl, &n, ret_seq);
+    int retVal = catta_netlink_send(nl, n, ret_seq);
+    catta_free(n);
+    return retVal;
+    /* </ES_mod> */
 }
 
 static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdata) {
@@ -105,15 +110,21 @@ static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdat
             (ifinfomsg->ifi_flags & IFF_MULTICAST) &&
             (m->server->config.allow_point_to_point || !(ifinfomsg->ifi_flags & IFF_POINTOPOINT));
 
+        //#define IFLA_RTA(r)  ((struct rtattr*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifinfomsg))))
         /* Handle interface attributes */
         l = NLMSG_PAYLOAD(n, sizeof(struct ifinfomsg));
-        char ifinfomsg_char[sizeof(struct ifinfomsg)];
-        memcpy(&ifinfomsg_char, ifinfomsg, sizeof(struct ifinfomsg));
-        char * ifinfomsg_char_ptr = (char *)ifinfomsg_char + NLMSG_ALIGN(sizeof(struct ifaddrmsg));
-        struct rtattr a_copy;
-        memcpy(&a_copy, ifinfomsg_char_ptr, sizeof(struct rtattr));
-        a = &a_copy;
-
+        /* <ES_mod> */
+        /*
+            | nlmsghdr  | size is even
+            | ifinfomsg | nlmsghdr contains ifinfomsg and it's size is even
+            | rtattr    | ifinfomsg contains rtattr and it's size is even
+            | payload   | ifinfomsg contains payload and it's size should be even as it's part of structure rtattr
+        */
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wcast-align"
+        a = IFLA_RTA(ifinfomsg);
+        #pragma clang diagnostic pop
+        /* </ES_mod> */
 
         while (RTA_OK(a, l)) {
             switch(a->rta_type) {
@@ -144,8 +155,17 @@ static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdat
                 default:
                     ;
             }
-
+            /* <ES_mod> */
+            /*
+                rtattr has alignment of 2 and casting it to char* keeps pointer address to even.
+                Adding RTA_ALIGN((rta)->rta_len) keeps the pointer aligned with 2.
+            */
+            #pragma clang diagnostic push
+            #pragma clang diagnostic ignored "-Wcast-align"
             a = RTA_NEXT(a, l);
+            #pragma clang diagnostic pop
+            /* </ES_mod> */
+
         }
 
         /* Check whether this interface is now "relevant" for us. If
@@ -201,7 +221,16 @@ static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdat
         rlocal.proto = raddr.proto = catta_af_to_proto(ifaddrmsg->ifa_family);
 
         l = NLMSG_PAYLOAD(n, sizeof(struct ifaddrmsg));
+        /* <ES_mod> */
+        /*
+            NLMSG_ALIGN(sizeof(struct ifaddrmsg)) in the macro makes sure the pointer
+            is 2 byte aligned.
+        */
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wcast-align"
         a = IFA_RTA(ifaddrmsg);
+        #pragma clang diagnostic pop
+        /* </ES_mod> */
 
         while (RTA_OK(a, l)) {
 
@@ -238,8 +267,16 @@ static void netlink_callback(CattaNetlink *nl, struct nlmsghdr *n, void* userdat
                 default:
                     ;
             }
-
+            /* <ES_mod> */
+            /*
+              rtattr has alignment of 2 and casting it to char* keeps pointer address to even.
+              Adding RTA_ALIGN((rta)->rta_len) keeps the pointer aligned with 2.
+            */
+            #pragma clang diagnostic push
+            #pragma clang diagnostic ignored "-Wcast-align"
             a = RTA_NEXT(a, l);
+            #pragma clang diagnostic pop
+            /* </ES_mod> */
         }
 
         /* If there was no adress attached to this message, let's quit. */
@@ -384,11 +421,11 @@ void catta_interface_monitor_sync(CattaInterfaceMonitor *m) {
 
     /* Let's handle netlink events until we are done with wild
      * dumping */
-
+    /* <ES_mod> */
     while (!m->list_complete)
         if (catta_netlink_work(m->osdep.netlink, 1) != 0)
             break;
-
+    /* </ES_mod> */
     /* At this point Catta knows about all local interfaces and
      * addresses in existance. */
 }

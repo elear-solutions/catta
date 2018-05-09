@@ -57,10 +57,10 @@ char *catta_address_snprint(char *s, size_t length, const CattaAddress *a) {
     assert(s);
     assert(length);
     assert(a);
-
+    /* <ES_mod> */
     if (!(inet_ntop(catta_proto_to_af(a->proto), (const void *)a->data.data, s, length)))
         return NULL;
-
+    /* </ES_mod> */
     return s;
 }
 

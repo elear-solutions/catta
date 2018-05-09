@@ -567,8 +567,9 @@ static void reflect_probe(CattaServer *s, CattaInterface *i, CattaRecord *r) {
         if (j != i && (s->config.reflect_ipv || j->protocol == i->protocol))
             catta_interface_post_probe(j, r, 1);
 }
-
+/* <ES_mod> */
 static void handle_query_packet(CattaServer *s, CattaDnsPacket *p, CattaInterface *i, CattaAddress *a, uint16_t port, int legacy_unicast, int from_local_iface) {
+/* </ES_mod> */    
     size_t n;
     int is_probe;
 

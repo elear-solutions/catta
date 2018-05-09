@@ -162,7 +162,9 @@ int catta_key_is_valid(CattaKey *k);
 int catta_record_is_valid(CattaRecord *r);
 
 /** Parse a binary rdata object and fill it into *record. This function is actually implemented in dns.c */
+/* <ES_mod> */
 int catta_rdata_parse(CattaRecord *record, void* rdata, size_t size);
+/* </ES_mod> */
 
 /** Serialize an CattaRecord object into binary rdata. This function is actually implemented in dns.c */
 size_t catta_rdata_serialize(CattaRecord *record, void *rdata, size_t max_size);

@@ -483,8 +483,9 @@ static void* start_poof_callback(CattaCache *c, CattaKey *pattern, CattaCacheEnt
 
     return NULL;
 }
-
+/* <ES_mod> */
 void catta_cache_start_poof(CattaCache *c, CattaKey *key, CattaAddress *a) {
+/* <ES_mod> */    
     assert(c);
     assert(key);
 

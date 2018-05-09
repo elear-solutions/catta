@@ -79,26 +79,39 @@ int catta_netlink_work(CattaNetlink *nl, int block) {
         catta_log_warn("No sender credentials received, ignoring data.");
         return -1;
     }
+    /* <ES_mod> */
     struct ucred cred_copy;
-    memcpy(&cred_copy, CMSG_DATA(cmsg), (sizeof(struct ucred)));
+    unsigned char *cmsgData = CMSG_DATA(cmsg);
+    memcpy(&cred_copy, cmsgData, (sizeof(struct ucred)));
     cred = &cred_copy;
+    /* </ES_mod> */
 
     if (cred->uid != 0)
         return -1;
-
+    /* <ES_mod> */
     struct nlmsghdr p_copy;
-    memcpy(&p_copy, nl->buffer, sizeof(struct nlmsghdr));
+    memcpy(&p_copy, nl->buffer, sizeof(uint8_t)*(nl->buffer_length));
     p = &p_copy;
-
+    /* </ES_mod> */
     assert(nl->callback);
-
-    for (; bytes > 0; p = NLMSG_NEXT(p, bytes)) {
+    for (; bytes > 0;) {
         if (!NLMSG_OK(p, (size_t) bytes)) {
             catta_log_warn(__FILE__": packet truncated");
             return -1;
         }
 
         nl->callback(nl, p, nl->userdata);
+        /* <ES_mod> */
+        /*
+          NLMSG_ALIGN used in the macro makes sure that after pointer arithmetic
+          the pointer is aligned with struct nlmsghdr boundary i.e. 4 byte.
+        */
+        #pragma clang diagnostic push
+        #pragma clang diagnostic ignored "-Wcast-align"
+        p = NLMSG_NEXT(p, bytes);
+        #pragma clang diagnostic pop
+        /* </ES_mod> */
+
     }
 
     return 0;

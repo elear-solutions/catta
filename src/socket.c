@@ -468,15 +468,19 @@ static int sendmsg_loop(int fd, struct msghdr *msg, int flags) {
             char where[64];
             struct sockaddr *sa = msg->msg_name;
             if(sa->sa_family == AF_INET) {
+		/* <ES_mod> */
                 struct sockaddr_in sa_in;
                 memcpy(&sa_in, sa, sizeof(struct sockaddr));
                 inet_ntop(sa->sa_family, &(&sa_in)->sin_addr, where, sizeof(where));
-            }
+                /* </ES_mod> */
+	    }
             else {
+		/* <ES_mod> */
                 struct sockaddr_in6 sa_in6;
                 memcpy(&sa_in6, sa, sizeof(struct sockaddr));
                 inet_ntop(sa->sa_family, &(&sa_in6)->sin6_addr, where, sizeof(where));
-            }
+                /* </ES_mod> */
+	    }
             catta_log_debug("sendmsg() to %s failed: %s", where, errnostrsocket());
             return -1;
         }
@@ -542,9 +546,12 @@ int catta_send_dns_packet_ipv4(
         cmsg->cmsg_len = msg.msg_controllen;
         cmsg->cmsg_level = IPPROTO_IP;
         cmsg->cmsg_type = IP_PKTINFO;
-        char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-        memcpy(&pkti_copy, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
+        /* <ES_mod> */
+        unsigned char *cmsg_data_copy = CMSG_DATA(cmsg);
+        memcpy(&pkti_copy, cmsg_data_copy, (sizeof(struct in_pktinfo)));
         pkti = &pkti_copy;
+        /* </ES_mod> */
+
 
         if (iface > 0)
             pkti->ipi_ifindex = iface;
@@ -640,9 +647,11 @@ int catta_send_dns_packet_ipv6(
         cmsg->cmsg_len = msg.msg_controllen;
         cmsg->cmsg_level = IPPROTO_IPV6;
         cmsg->cmsg_type = IPV6_PKTINFO;
-        char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-        memcpy(&pkti_copy, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
+        /* <ES_mod> */
+        unsigned char *cmsg_data_copy = CMSG_DATA(cmsg);
+        memcpy(&pkti_copy, cmsg_data_copy, (sizeof(struct in6_pktinfo)));
         pkti = &pkti_copy;
+        /* </ES_mod> */
 
         if (iface > 0)
             pkti->ipi6_ifindex = iface;
@@ -753,20 +762,20 @@ CattaDnsPacket *catta_recv_dns_packet_ipv4(
 #endif
                 case IP_TTL:
                     if (ret_ttl) {
-                      uint8_t cmsg_data_int8;
-                      char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-                      memcpy(&cmsg_data_int8, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
-                      *ret_ttl = cmsg_data_int8;
+                      /* <ES_mod> */
+                      *ret_ttl = (uint8_t) (*CMSG_DATA(cmsg));
+                      /* </ES_mod> */
                     }
-
                     break;
 
 #ifdef IP_PKTINFO
                 case IP_PKTINFO: {
+                    /* <ES_mod> */
                     struct in_pktinfo i_copy;
-                    char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-                    memcpy(&i_copy, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
+                    unsigned char *cmsg_data_copy = CMSG_DATA(cmsg);
+                    memcpy(&i_copy, cmsg_data_copy, (sizeof(struct in_pktinfo)));
                     struct in_pktinfo *i = &i_copy;
+                    /* </ES_mod> */
 
                     if (ret_iface && i->ipi_ifindex > 0)
                         *ret_iface = (int) i->ipi_ifindex;
@@ -910,21 +919,24 @@ CattaDnsPacket *catta_recv_dns_packet_ipv6(
 
                 case IPV6_HOPLIMIT:
                     if (ret_ttl) {
-                      uint8_t cmsg_data_int8;
-                      char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-                      memcpy(&cmsg_data_int8, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
-                      *ret_ttl = (uint8_t) cmsg_data_int8;
+                      /* <ES_mod> */
+                      int cmsg_data_int;
+                      memcpy(&cmsg_data_int, CMSG_DATA(cmsg), sizeof(int));
+                      *ret_ttl = (uint8_t)cmsg_data_int;
+                      /* <ES_mod> */
                     }
+
                     found_ttl = 1;
 
                     break;
 
                 case IPV6_PKTINFO: {
+                    /* <ES_mod> */
                     struct in6_pktinfo i_copy;
-                    char *cmsg_data_copy = (char *)CMSG_DATA(cmsg);
-                    memcpy(&i_copy, (unsigned char *)cmsg_data_copy, (sizeof(unsigned char)*strlen(cmsg_data_copy)));
+                    unsigned char *cmsg_data_copy = CMSG_DATA(cmsg);
+                    memcpy(&i_copy, cmsg_data_copy, (sizeof(struct in6_pktinfo)));
                     struct in6_pktinfo *i = &i_copy;
-
+                    /* </ES_mod> */
                     if (ret_iface && i->ipi6_ifindex > 0)
                         *ret_iface = i->ipi6_ifindex;
 

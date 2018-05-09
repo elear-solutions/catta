@@ -253,14 +253,16 @@ char *catta_record_to_string(const CattaRecord *r) {
     assert(r->ref >= 1);
 
     switch (r->key->type) {
+        /* <ES_mod> */
         case CATTA_DNS_TYPE_A:
             inet_ntop(AF_INET, (const void *)&r->data.a.address.address, t = buf, sizeof(buf));
             break;
-
+        /* </ES_mod> */
+        /* <ES_mod> */
         case CATTA_DNS_TYPE_AAAA:
             inet_ntop(AF_INET6, (const void *)&r->data.aaaa.address.address, t = buf, sizeof(buf));
             break;
-
+        /* </ES_mod> */
         case CATTA_DNS_TYPE_PTR:
         case CATTA_DNS_TYPE_CNAME:
         case CATTA_DNS_TYPE_NS:
