@@ -14,17 +14,17 @@ class CattalibConan(ConanFile):
     default_options = "shared=False"
     generators = "make"
 
-
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
         self.run("cd .. && autoreconf -fsi ")
-        autotools.configure(configure_dir="..",args=["--prefix=${PWD}"])
+        autotools.configure(configure_dir="..", args=[ "--prefix=${PWD}" ])
         autotools.make()
         autotools.install()
+
     def package(self):
         self.copy("*.h", dst="include", src="include/include")
-        self.copy("*.la", dst="lib", src="lib",keep_path=False)
+        self.copy("*", dst="lib", src="src/lib",keep_path=False)
 
     def package_info(self):
-        self.cpp_info.libs = ["catta"]
+        self.cpp_info.libs = [ "catta" ]
 

@@ -280,6 +280,8 @@ if test "x$GCC" = "xyes" ; then
     done
 fi
 
+CFLAGS+=" -fPIC"
+
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h netinet/in.h sys/ioctl.h sys/socket.h sys/time.h unistd.h])
 
