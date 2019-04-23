@@ -1,6 +1,5 @@
 from conans import ConanFile, AutoToolsBuildEnvironment, tools
 
-
 class CattalibConan(ConanFile):
     name = "catta"
     version = "0.1"
@@ -27,4 +26,3 @@ class CattalibConan(ConanFile):
 
     def package_info(self):
         self.cpp_info.libs = [ "catta" ]
-
