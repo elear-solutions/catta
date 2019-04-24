@@ -22,7 +22,7 @@ class CattalibConan(ConanFile):
 
     def package(self):
         self.copy("*.h", dst="include", src="include/include")
-        self.copy("*", dst="lib", src="src/lib",keep_path=False)
+        self.copy("*", dst="lib", src="src/lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = [ "catta" ]
