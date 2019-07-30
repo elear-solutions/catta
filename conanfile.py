@@ -1,4 +1,4 @@
-from conans import ConanFile, AutoToolsBuildEnvironment, tools
+from conans import ConanFile, AutoToolsBuildEnvironment
 
 class CattalibConan(ConanFile):
     name = "catta"
