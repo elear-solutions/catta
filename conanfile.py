@@ -5,7 +5,7 @@ class CattalibConan(ConanFile):
     license = "<Put the package license here>"
     author = "<Put your name here> <And your email here>"
     url = "<Package recipe repository url here, for issues about the package>"
-    description = "This recipe file used to build and package binaries of cocostandard repository"
+    description = "This recipe file used to build and package binaries of catta repository"
     topics = ("<Put some tag here>", "<here>", "<and here>")
     settings = "os", "compiler", "build_type", "arch"
     options = {"shared": [True, False]}
