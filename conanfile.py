@@ -20,6 +20,9 @@ class CattalibConan(ConanFile):
             "iOS-x86-*": "i386-apple-ios",
             "iOS-x86_64-*": "x86_64-apple-ios"
         }
+    def config_options(self):
+        args = ["--prefix=${PWD}"]
+        return args
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
