@@ -26,6 +26,7 @@ class CattalibConan(ConanFile):
 
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
+        args = self.config_options()
         # self.run("cd .. && autoreconf -fsi ")
         query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
