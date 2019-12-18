@@ -17,7 +17,6 @@ class CattalibConan(ConanFile):
     @property
     def _targets(self):
         return {
-            "iOS-x86-*": "i386-apple-ios",
             "iOS-x86_64-*": "x86_64-apple-ios"
         }
     def config_options(self):
