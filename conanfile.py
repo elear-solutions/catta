@@ -12,10 +12,22 @@ class CattalibConan(ConanFile):
     default_options = "shared=False"
     generators = "make"
 
+    @property
+    def _targets(self):
+        return {
+            "iOS-x86-*": "i386-apple-ios",
+            "iOS-x86_64-*": "x86_64-apple-ios"
+        }
+
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
-        self.run("cd .. && autoreconf -fsi ")
-        autotools.configure(configure_dir="..", args=[ "--prefix=${PWD}" ])
+        # self.run("cd .. && autoreconf -fsi ")
+        query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
+        ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
+        if not ancestor:
+            autotools.configure(configure_dir= "..",args= args, use_default_install_dirs=True)
+        else:
+            autotools.configure(configure_dir= "..",args= args, use_default_install_dirs=True, host= ancestor)
         autotools.make()
         autotools.install()
 
