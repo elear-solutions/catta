@@ -17,7 +17,8 @@ class CattalibConan(ConanFile):
     @property
     def _targets(self):
         return {
-            "iOS-x86_64-*": "x86_64-apple-ios"
+            "iOS-x86-*": "iphoneos-cross",
+            "iOS-x86_64-*": "iphoneos-cross"
         }
     def config_options(self):
         args = ["--prefix=${PWD}"]
