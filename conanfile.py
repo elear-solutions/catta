@@ -1,3 +1,5 @@
+import os
+import fnmatch
 from conans import ConanFile, AutoToolsBuildEnvironment
 
 class CattalibConan(ConanFile):
