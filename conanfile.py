@@ -4,21 +4,25 @@ from conans import ConanFile, AutoToolsBuildEnvironment
 
 class CattalibConan(ConanFile):
     name = "catta"
+    version = "0.0.2"
     license = "<Put the package license here>"
     author = "<Put your name here> <And your email here>"
-    url = "<Package recipe repository url here, for issues about the package>"
+    url = "https://github.com/elear-solutions/catta"
     description = "This recipe file used to build and package binaries of catta repository"
-    topics = ("<Put some tag here>", "<here>", "<and here>")
+    topics = ("service", "discovery", "avahi")
     settings = "os", "compiler", "build_type", "arch"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {
+        "shared": [True, False]
+        }
+    default_options = {key: False for key in options.keys()}
+    default_options ["shared"] = False
     generators = "make"
 
     @property
     def _targets(self):
         return {
-            "iOS-x86-*": "iphoneos-cross",
-            "iOS-x86_64-*": "iphoneos-cross"
+            "iOS-x86-*": "i686-apple-darwin",
+            "iOS-x86_64-*": "x86_64-apple-ios"
         }
     def config_options(self):
         args = ["--prefix=${PWD}"]
