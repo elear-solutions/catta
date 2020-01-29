@@ -21,7 +21,7 @@ class CattalibConan(ConanFile):
     @property
     def _targets(self):
         return {
-            "iOS-x86-*": "i686-apple-darwin",
+            "iOS-x86-*": "i386-apple-ios",
             "iOS-x86_64-*": "x86_64-apple-ios"
         }
     def config_options(self):
@@ -31,7 +31,7 @@ class CattalibConan(ConanFile):
     def build(self):
         autotools = AutoToolsBuildEnvironment(self)
         args = self.config_options()
-        # self.run("cd .. && autoreconf -fsi ")
+        self.run("cd .. && autoreconf -fsi ")
         query = "%s-%s-%s" % (self.settings.os, self.settings.arch, self.settings.compiler)
         ancestor = next((self._targets[i] for i in self._targets if fnmatch.fnmatch(query, i)), None)
         if not ancestor:
